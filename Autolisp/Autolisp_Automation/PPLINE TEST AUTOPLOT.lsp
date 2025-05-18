@@ -1,130 +1,129 @@
-;; Selection Set Bounding Box  -  Lee Mac
-;; Returns a list of the lower-left and upper-right WCS coordinates of a
-;; rectangular frame bounding all objects in a supplied selection set.
-;; sel - [sel] Selection set for which to return bounding box
-  (defun LM:ssboundingbox ( sel / idx llp ls1 ls2 obj urp )
-      (repeat (setq idx (sslength sel))
-          (setq obj (vlax-ename->vla-object (ssname sel (setq idx (1- idx)))))
-          (if (and (vlax-method-applicable-p obj 'getboundingbox)
-                  (not (vl-catch-all-error-p (vl-catch-all-apply 'vla-getboundingbox (list obj 'llp 'urp))))
-              )
-              (setq ls1 (cons (vlax-safearray->list llp) ls1)
-                    ls2 (cons (vlax-safearray->list urp) ls2)
-              )
-          )
-      )
-      (if (and ls1 ls2)
-          (mapcar '(lambda ( a b ) (apply 'mapcar (cons a b))) '(min max) (list ls1 ls2))
-      )
-  )
-;; Selection Set Bounding Box  -  Lee Mac
-;; Returns a list of the lower-left and upper-right WCS coordinates of a
-;; rectangular frame bounding all objects in a supplied selection set.
-;; sel - [sel] Selection set for which to return bounding box
-
-  (defun LM:ssboundingbox ( sel / idx llp ls1 ls2 obj urp )
-      (repeat (setq idx (sslength sel))
-          (setq obj (vlax-ename->vla-object (ssname sel (setq idx (1- idx)))))
-          (if (and (vlax-method-applicable-p obj 'getboundingbox)
-                  (not (vl-catch-all-error-p (vl-catch-all-apply 'vla-getboundingbox (list obj 'llp 'urp))))
-              )
-              (setq ls1 (mapcar 'min (vlax-safearray->list llp) (cond (ls1) ((vlax-safearray->list llp))))
-                    ls2 (mapcar 'max (vlax-safearray->list urp) (cond (ls2) ((vlax-safearray->list urp))))
-              )
-          )
-      )
-      (if (and ls1 ls2) (list ls1 ls2))
-  )
-;
-;; Bounding Box  -  Lee Mac
-;; Returns the point list describing the rectangular frame bounding the supplied object.
-;; obj - [vla] VLA-Object
-
-  (defun LM:boundingbox ( obj / a b lst )
-      (if
-          (and
-              (vlax-method-applicable-p obj 'getboundingbox)
-              (not (vl-catch-all-error-p (vl-catch-all-apply 'vla-getboundingbox (list obj 'a 'b))))
-              (setq lst (mapcar 'vlax-safearray->list (list a b)))
-          )
-          (mapcar '(lambda ( a ) (mapcar '(lambda ( b ) ((eval b) lst)) a))
-            '(
-                  (caar   cadar)
-                  (caadr  cadar)
-                  (caadr cadadr)
-                  (caar  cadadr)
-              )
-          )
-      )
-  )
-;
-(defun LM:StringSubst (new old str / inc len) 
-  (setq len (strlen new)
-        inc 0
-  )
-  (while (setq inc (vl-string-search old str inc)) 
-    (setq str (vl-string-subst new old str inc)
-          inc (+ inc len)
+;Bounding_Box_FUNC_
+  ;; Selection Set Bounding Box  -  Lee Mac
+  ;; Returns a list of the lower-left and upper-right WCS coordinates of a
+  ;; rectangular frame bounding all objects in a supplied selection set.
+  ;; sel - [sel] Selection set for which to return bounding box
+    (defun LM:ssboundingbox ( sel / idx llp ls1 ls2 obj urp )
+        (repeat (setq idx (sslength sel))
+            (setq obj (vlax-ename->vla-object (ssname sel (setq idx (1- idx)))))
+            (if (and (vlax-method-applicable-p obj 'getboundingbox)
+                    (not (vl-catch-all-error-p (vl-catch-all-apply 'vla-getboundingbox (list obj 'llp 'urp))))
+                )
+                (setq ls1 (cons (vlax-safearray->list llp) ls1)
+                      ls2 (cons (vlax-safearray->list urp) ls2)
+                )
+            )
+        )
+        (if (and ls1 ls2)
+            (mapcar '(lambda ( a b ) (apply 'mapcar (cons a b))) '(min max) (list ls1 ls2))
+        )
     )
-  )
-  str
-)
-;Get_Data Document Ta Trai
-  (defun LM:getdocumentobject ( dwg / app dbx dwl err vrs )
-      (cond
-          (   (not (setq dwg (findfile dwg))) nil)
-          (   (cdr
-                  (assoc (strcase dwg)
-                      (vlax-for doc (vla-get-documents (setq app (vlax-get-acad-object)))
-                          (setq dwl (cons (cons (strcase (vla-get-fullname doc)) doc) dwl))
-                      )
-                  )
-              )
-          )
-          (   (progn
-                  (setq dbx
-                      (vl-catch-all-apply 'vla-getinterfaceobject
-                          (list app
-                              (if (< (setq vrs (atoi (getvar 'acadver))) 16)
-                                  "objectdbx.axdbdocument"
-                                  (strcat "objectdbx.axdbdocument." (itoa vrs))
-                              )
-                          )
-                      )
-                  )
-                  (or (null dbx) (vl-catch-all-error-p dbx))
-              )
-              (prompt "\nUnable to interface with ObjectDBX.")
-          )
-          (   (vl-catch-all-error-p (setq err (vl-catch-all-apply 'vla-open (list dbx dwg))))
-              (prompt (strcat "\n" (vl-catch-all-error-message err)))
-          )
-          (   dbx   )
+  ;; Selection Set Bounding Box  -  Lee Mac
+  ;; Returns a list of the lower-left and upper-right WCS coordinates of a
+  ;; rectangular frame bounding all objects in a supplied selection set.
+  ;; sel - [sel] Selection set for which to return bounding box
+
+    (defun LM:ssboundingbox ( sel / idx llp ls1 ls2 obj urp )
+        (repeat (setq idx (sslength sel))
+            (setq obj (vlax-ename->vla-object (ssname sel (setq idx (1- idx)))))
+            (if (and (vlax-method-applicable-p obj 'getboundingbox)
+                    (not (vl-catch-all-error-p (vl-catch-all-apply 'vla-getboundingbox (list obj 'llp 'urp))))
+                )
+                (setq ls1 (mapcar 'min (vlax-safearray->list llp) (cond (ls1) ((vlax-safearray->list llp))))
+                      ls2 (mapcar 'max (vlax-safearray->list urp) (cond (ls2) ((vlax-safearray->list urp))))
+                )
+            )
+        )
+        (if (and ls1 ls2) (list ls1 ls2))
+    )
+  ;
+  ;; Bounding Box  -  Lee Mac
+  ;; Returns the point list describing the rectangular frame bounding the supplied object.
+  ;; obj - [vla] VLA-Object
+
+    (defun LM:boundingbox ( obj / a b lst )
+        (if
+            (and
+                (vlax-method-applicable-p obj 'getboundingbox)
+                (not (vl-catch-all-error-p (vl-catch-all-apply 'vla-getboundingbox (list obj 'a 'b))))
+                (setq lst (mapcar 'vlax-safearray->list (list a b)))
+            )
+            (mapcar '(lambda ( a ) (mapcar '(lambda ( b ) ((eval b) lst)) a))
+              '(
+                    (caar   cadar)
+                    (caadr  cadar)
+                    (caadr cadadr)
+                    (caar  cadadr)
+                )
+            )
+        )
+    )
+;
+;Text_FUNC_
+  (defun LM:StringSubst (new old str / inc len) 
+    (setq len (strlen new)
+          inc 0
+    )
+    (while (setq inc (vl-string-search old str inc)) 
+      (setq str (vl-string-subst new old str inc)
+            inc (+ inc len)
       )
-  )
-  (defun getdrawinglayouts ( dwg / doc idx rtn )
-    ;original_method_
-      (if (setq doc (LM:getdocumentobject dwg))
-          (progn
-              (vlax-for lyt (vla-get-layouts doc)
-                  (setq rtn (cons (vla-get-name lyt) rtn)
-                        idx (cons (vla-get-taborder lyt) idx)
-                  )
-              )
-              (vlax-release-object doc)
-              (mapcar '(lambda ( n ) (nth n rtn)) (vl-sort-i idx '<))
-          )
-      )
-    ;
+    )
+    str
   )
 ;
+;Get_DOC_FUNC_
+  ;Get_Data Document Ta Trai
+    (defun LM:getdocumentobject ( dwg / app dbx dwl err vrs )
+        (cond
+            (   (not (setq dwg (findfile dwg))) nil)
+            (   (cdr
+                    (assoc (strcase dwg)
+                        (vlax-for doc (vla-get-documents (setq app (vlax-get-acad-object)))
+                            (setq dwl (cons (cons (strcase (vla-get-fullname doc)) doc) dwl))
+                        )
+                    )
+                )
+            )
+            (   (progn
+                    (setq dbx
+                        (vl-catch-all-apply 'vla-getinterfaceobject
+                            (list app
+                                (if (< (setq vrs (atoi (getvar 'acadver))) 16)
+                                    "objectdbx.axdbdocument"
+                                    (strcat "objectdbx.axdbdocument." (itoa vrs))
+                                )
+                            )
+                        )
+                    )
+                    (or (null dbx) (vl-catch-all-error-p dbx))
+                )
+                (prompt "\nUnable to interface with ObjectDBX.")
+            )
+            (   (vl-catch-all-error-p (setq err (vl-catch-all-apply 'vla-open (list dbx dwg))))
+                (prompt (strcat "\n" (vl-catch-all-error-message err)))
+            )
+            (   dbx   )
+        )
+    )
+    (defun getdrawinglayouts ( dwg / doc idx rtn )
+      ;original_method_
+        (if (setq doc (LM:getdocumentobject dwg))
+            (progn
+                (vlax-for lyt (vla-get-layouts doc)
+                    (setq rtn (cons (vla-get-name lyt) rtn)
+                          idx (cons (vla-get-taborder lyt) idx)
+                    )
+                )
+                (vlax-release-object doc)
+                (mapcar '(lambda ( n ) (nth n rtn)) (vl-sort-i idx '<))
+            )
+        )
+      ;
+    )
+  ;
+;
 
-
-(if (= (getvar "ctab") "Model") ;move model
-  (progn
-    (setvar "ctab" (nth 1 (getdrawinglayouts (getvar "dwgname"))))
-  )
-)
 
 (defun c:find_xref_ ()
   ;selection_set_for_fillter_blk_name
@@ -188,8 +187,6 @@
     )
   ;
 )
-
-
 (defun c:RUN_plot ()
   ;selection_set_for_fillter_blk_name
     (if  ;pre_select_ssget_or_post_select_ssget
@@ -303,12 +300,16 @@
   ;
 )
 
-;test
-  ; (alert "SS")
-;
-;automation_line
-  (command "zoom" "a")
+;automation_Process
+  ;(alert "SS")
+  (if (= (getvar "ctab") "Model") ;move model
+    (progn
+      (setvar "ctab" (nth 1 (getdrawinglayouts (getvar "dwgname"))))
+    )
+  )
+  (command "zoom" "a") 
   (c:find_xref_)
   (c:RUN_plot)
   (command "close" "n" )
-;
+;  
+
