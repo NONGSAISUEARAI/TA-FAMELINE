@@ -303,9 +303,12 @@
   ;
 )
 
-; (alert "SS")
-(c:find_xref_)
-(c:RUN_plot)
-; (command "quit" "n" )
-(command "close" "n" )
-
+;test
+  ; (alert "SS")
+;
+;automation_line
+  (command "zoom" "a")
+  (c:find_xref_)
+  (c:RUN_plot)
+  (command "close" "n" )
+;
