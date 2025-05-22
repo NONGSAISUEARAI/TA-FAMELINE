@@ -1,0 +1,1 @@
+(load "C:/TA/TA_WORK/AUTOCAD + VBA + LISP/TA_COMPELETE/QM test1.lsp")

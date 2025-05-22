@@ -1,0 +1,76 @@
+; ; (vl-load-com)
+; ; (defun c:Example_AddDimRotated()
+; ;     ;; This example creates a rotated dimension in model space.
+; ;     (setq acadObj (vlax-get-acad-object))
+; ;     (setq doc (vla-get-ActiveDocument acadObj))
+  
+; ;     (setq lo_xy (getpoint))
+; ;     (setq lo_x (car lo_xy))
+; ;     (setq lo_y (cadr lo_xy))
+  
+; ;     ;; Define the dimension
+; ;     (setq point1 ((vlax-3d-point 0 5 0))
+; ;           point2 (vlax-3d-point 5 5 0)
+; ;           location (vlax-3d-point lo_x lo_y 0)
+; ;           rotAngle (/ (* 0 3.141592) 180))
+    
+; ;     ;; Create the rotated dimension in model space
+; ;     (setq modelSpace (vla-get-ModelSpace doc))
+; ;     (setq dimObj (vla-AddDimRotated modelSpace point1 point2 location rotAngle))
+; ;     (vla-ZoomAll acadObj)
+; ; )
+
+; (defun c:vccc ()
+;   ; (setq ssss (car (entsel)))
+;   ; ; (setq ssss_x (cadr ssss))
+;   (setq abx (entget (car (entsel "\n OK GO"))))
+;   (setq abx_car (assoc -1 abx))
+;   (setq abx_car2 (assoc 10 abx))
+  
+  
+;   (setq abx_car1 (cdr abx_car))
+  
+  
+;   (setq o_i (vlax-ename->vla-object abx_car1))
+;   (princ abx)
+;   (princ "\n =")
+;   (vla-get-rotation o_i)
+;     (setq textPosition (vlax-variant-value (vla-get-TextPosition dimObj)))
+;     (setq jj (strcat "The current text position for the dimension is " (rtos (vlax-safearray-get-element textPosition 0) 2) ", "
+;                                                                      (rtos (vlax-safearray-get-element textPosition 1) 2) ", "
+;                                                                      (rtos (vlax-safearray-get-element textPosition 2) 2)))
+;     (setq k (getint))
+  
+;     ; (setq location (vlax-3d-point 3.6969 (+ 8.2 k) 0))
+;     (setq location (vlax-3d-point (k) (k) 0))
+    
+;     (vla-put-textposition o_i location)
+  
+
+; )
+
+; (defun c:dxz ()
+;   (setq p1 (entsel))
+;   (setq p2 (entsel))
+  
+  
+;   (command "dimspace" p1 p2 "" 10)
+; )
+
+
+(defun c:xccv ()
+  ; (setq ssss (car (entsel)))
+  ; ; (setq ssss_x (cadr ssss))
+  (setq abxx (entget (car (entsel "\n OK GO"))))
+  (setq abxcm (cdr (assoc -1 abxx)))
+  ; (setq abxcmx (cdr abxcm))
+  (setq o_i (vlax-ename->vla-object abxcm))
+  (vla-get-vertexcount o_i)
+  
+  
+  
+  
+  
+  
+  
+)

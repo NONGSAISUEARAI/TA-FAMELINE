@@ -1,0 +1,143 @@
+; (defun selection-set-to-list (selection-set)
+  ;   (setq my-list '()) ; สร้างลิสต์ว่าง
+
+  ;   (setq num-entities (sslength selection-set)) ; หาความยาวของรายการ
+
+  ;   (setq i 0) ; ตั้งค่าตัวแปร i เป็น 0
+  ;   (while (< i num-entities)
+  ;     (setq entity (ssname selection-set i)) ; ดึง ename ของสมาชิกที่ i
+  ;     (setq my-list (cons entity my-list)) ; เพิ่ม ename ลงในลิสต์
+  ;     (setq i (+ i 1)) ; เพิ่มค่า i อีก 1 หลังจากที่ดึงข้อมูลแล้ว
+  ;   )
+
+  ;   (reverse my-list) ; กลับด้านลิสต์เพื่อให้ลำดับถูกต้อง)
+  ; )
+
+  ; (setq my-selection-set (ssget '((0 . "INSERT")))) ; ตัวอย่างการใช้ ssget
+
+  ; (setq my-list (selection-set-to-list my-selection-set))
+
+; ; ผลลัพธ์คือ my-list ที่มีรายการของ ename ของเส้นทั้งหมดในรายการ
+(defun c:REEC_RENUMBER_CODE ()
+  (defun LM:vl-setattributevalue ( blk tag val )
+      (setq tag (strcase tag))
+      (vl-some
+        '(lambda ( att )
+              (if (= tag (strcase (vla-get-tagstring att)))
+                  (progn (vla-put-textstring att val) val)
+              )
+          )
+          (vlax-invoke blk 'getattributes)
+      )
+  )
+
+  (defun get-x-coordinate (entity)
+    (cadr (assoc 10 (entget entity)))
+  )
+  
+  (defun get-y-coordinate (entity)
+    (caddr (assoc 10 (entget entity)))
+  )
+  
+  (defun get-title-block-string (mode) 
+    (if (= mode 1) 
+      (setq sorted-enames (sort-entities-by-x my-selection-set))
+      (if (= mode 2) 
+      (setq sorted-enames (sort-entities-by-y my-selection-set))
+
+      )
+    )
+  )
+  
+  (setq mode-value (cond ( (getint (strcat "\nSpecify object \nmode 1 = Sorting_by_X (LEFT-RIGHT) \nmode 2 = Sorting_by_Y (UP-DOWN)\n<" (rtos (setq mode-value (cond (mode-value) (1.0) ) ) ) "> : \nไม่มี MODE 3 นะคนดีย์" ) ) ) (mode-value) ) )
+  
+  (defun sort-entities-by-x (selection-set)
+    (setq entity-list '())
+
+    (setq num-entities (sslength selection-set))
+
+    (setq i 0)
+    (while (< i num-entities)
+      (setq entity (ssname selection-set i))
+      (setq x-coord (get-x-coordinate entity))
+      (setq entity-list (cons (list entity x-coord) entity-list))
+      (setq i (+ i 1))
+    )
+
+    (setq sorted-entity-list (vl-sort entity-list 
+                                    '(lambda (a b) 
+                                      (if (and (cdr a) (cdr b))
+                                        (< (cadr a) (cadr b))
+                                        t) ; เมื่อไม่มีข้อมูล x ให้ถือว่าต่างกัน
+                                    )
+                          )
+    )
+
+    (setq sorted-ename-list '())
+    (foreach entity-entity sorted-entity-list
+      (setq sorted-ename-list (cons (car entity-entity) sorted-ename-list))
+    )
+
+    (reverse sorted-ename-list)
+  )
+  (defun sort-entities-by-y (selection-set)
+    (setq entity-list '())
+
+    (setq num-entities (sslength selection-set))
+
+    (setq i 0)
+    (while (< i num-entities)
+      (setq entity (ssname selection-set i))
+      (setq x-coord (get-y-coordinate entity))
+      (setq entity-list (cons (list entity x-coord) entity-list))
+      (setq i (+ i 1))
+    )
+
+    (setq sorted-entity-list (vl-sort entity-list 
+                                    '(lambda (a b) 
+                                      (if (and (cdr a) (cdr b))
+                                        (> (cadr a) (cadr b))
+                                        t) ; เมื่อไม่มีข้อมูล x ให้ถือว่าต่างกัน
+                                    )
+                          )
+    )
+
+    (setq sorted-ename-list '())
+    (foreach entity-entity sorted-entity-list
+      (setq sorted-ename-list (cons (car entity-entity) sorted-ename-list))
+    )
+
+    (reverse sorted-ename-list)
+  )
+
+  (setq my-selection-set (ssget  '((0 . "INSERT"))))
+
+  (setq result-mode (get-title-block-string mode-value))
+  (setq total-entities (length sorted-enames))
+  (setq i 0)
+  (setq ii 1) ; เริ่มต้น ii ที่ 101
+  (setq start_num (cond ( (getint (strcat "\nSpecify \nstart_num <" (rtos (setq start_num (cond (start_num) (1.0) ) ) ) "> : \nไม่มี MODE 3 นะคนดีย์" ) ) ) (start_num) ) )
+
+          (setq total-entities (length sorted-enames))
+          (while (< i total-entities)
+              (setq entity (nth i sorted-enames))
+              ; ทำสิ่งที่คุณต้องการกับ ename ที่ปรากฏในตำแหน่งที่ i ใน sorted-enames
+
+              (setq o (vlax-ename->vla-object entity))
+              
+            
+              (setq NAME_VIEWPORT_NEW start_num) ; สร้างชื่อใหม่โดยใช้ ii และแปลงเป็นสตริง
+              
+            
+              (LM:vl-setattributevalue o "NO.CODE" NAME_VIEWPORT_NEW)
+        
+
+z
+              (setq i (+ i 1))
+              (setq start_num (+ start_num 1))
+
+          )
+    
+; ผลลัพธ์คือ sorted-enames ที่เป็นรายการของ ename ที่ถูกจัดเรียงตามแกน x จากน้อยไปมาก
+
+)

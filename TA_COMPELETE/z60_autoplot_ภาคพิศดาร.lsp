@@ -1,0 +1,5 @@
+  (setq ss (entget (car (entsel))))
+  (setq ss_obj (vlax-ename->vla-object (cdr (car ss))))
+  (setq ss_dump (vlax-dump-object ss_obj ))
+  (vla-put-height ss_obj 297)
+  (vla-put-width  ss_obj 420)

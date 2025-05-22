@@ -1,0 +1,15 @@
+(defun c:qmsave ()
+    (setq FILEPATH (getvar "DWGPREFIX"))
+  (setq FILENAME (getvar "DWGNAME"))
+  (setq sum (strcat FILEPATH FILENAME))
+  (COMMAND "_SAVEAS" 
+          "2010"
+          sum
+          "Y"
+          
+          
+          
+  )
+  (command "close")
+
+  )

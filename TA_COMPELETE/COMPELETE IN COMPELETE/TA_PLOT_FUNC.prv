@@ -1,0 +1,12 @@
+;;; Visual LISP make file [V1.0] TA_PLOT_FUNC saved to:[C:/TA/TA_WORK/AUTOCAD + VBA + LISP/TA_COMPELETE/COMPELETE IN COMPELETE] at:[5/15/24] 
+(PRV-DEF (:target . "TA_PLOT_FUNC.VLX")
+	 (:active-x . T)
+	 (:separate-namespace)
+	 (:protected . T)
+	 (:load-file-list (:lsp "z56x_plot_func.lsp"))
+	 (:require-file-list)
+	 (:ob-directory)
+	 (:tmp-directory)
+	 (:optimization . st)
+)
+;; EOF

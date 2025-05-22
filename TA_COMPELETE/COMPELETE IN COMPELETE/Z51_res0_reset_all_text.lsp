@@ -1,0 +1,16 @@
+(defun c:Z51_res0_reset_all_text (/ Oldtstyle Sttxt Userfont error)
+  (defun error (s)
+    (setvar "textstyle" oldtstyle)
+  )
+  (setq oldtstyle (getvar "textstyle"))
+  (setq userfont "cordiaupc") ;"arial.ttf" <<<<change this for your textfont
+  (setvar "textstyle" (cdr (assoc 2 (tblnext "style" t))))
+  (command "._Style" "" userfont 2 1 0 "N" "N")
+  (while
+    (setq sttxt (cdr (assoc 2 (tblnext "style"))))
+     (setvar "textstyle" sttxt)
+     (command "._Style" "" userfont 2 1 0 "N" "N")
+  )
+  (setvar "textstyle" oldtstyle)
+  (princ)
+)

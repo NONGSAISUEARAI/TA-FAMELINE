@@ -1,0 +1,63 @@
+  ;user_input_mode_val
+    (setq mode-val nil)
+    (while ;user_input_mode_val
+      (not mode-val)
+      (if ;return_base_val_to_user_input
+        (/= mode-val-val nil)
+        (progn
+          (princ "/n")
+        )
+        (setq mode-val-val 2)
+      )
+      ;user_input_mode_val
+        (setq mode-val (cond ( (getint (strcat "\nSpecify Dim Scale Overall <" (rtos (setq mode-val-val (cond (mode-val-val) (mode-val) ) ) ) "> : " ) ) ) (mode-val-val) ) )
+      ;
+      (if ;incorrect_case
+        (and
+          (/= mode-val 1)
+          (/= mode-val 2)
+          (/= mode-val 3)
+        )
+        (progn
+          (setq mode-val-val mode-val )
+          (setq mode-val nil)
+          (alert "\n\n\n\Please input mode 1 2 or 3\n\n\n\n")
+        )
+        (princ mode-val)
+      )
+      (if ;correct_case
+        (or
+          (= mode-val 1)
+          (= mode-val 2)
+          (= mode-val 3)
+        )
+        (progn
+          (setq mode-val-val mode-val )
+        )
+        (princ mode-val)
+      )
+    )
+    (cond ;specify_efective_name_by_user_input
+      ((and
+        (= mode-v "1")
+       )
+       (progn
+        (setq blk_efname "LNAD - A4 TITLE BLOCK PART REV01")
+       )
+      )
+      ((and
+        (= mode-v "2")
+       )
+       (progn
+        (setq blk_efname  "LAND - A3 TITLE BLOCK")
+       )
+      )
+      ((and
+        (= mode-v "3")
+       )
+       (progn
+        (setq blk_efname  "GV3")
+       )
+      )
+    )
+  ;

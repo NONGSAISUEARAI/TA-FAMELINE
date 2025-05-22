@@ -1,0 +1,170 @@
+; (defun selection-set-to-list (selection-set)
+  ;   (setq my-list '()) ; สร้างลิสต์ว่าง
+
+  ;   (setq num-entities (sslength selection-set)) ; หาความยาวของรายการ
+
+  ;   (setq i 0) ; ตั้งค่าตัวแปร i เป็น 0
+  ;   (while (< i num-entities)
+  ;     (setq entity (ssname selection-set i)) ; ดึง ename ของสมาชิกที่ i
+  ;     (setq my-list (cons entity my-list)) ; เพิ่ม ename ลงในลิสต์
+  ;     (setq i (+ i 1)) ; เพิ่มค่า i อีก 1 หลังจากที่ดึงข้อมูลแล้ว
+  ;   )
+
+  ;   (reverse my-list) ; กลับด้านลิสต์เพื่อให้ลำดับถูกต้อง)
+  ; )
+
+  ; (setq my-selection-set (ssget '((0 . "INSERT")))) ; ตัวอย่างการใช้ ssget
+
+  ; (setq my-list (selection-set-to-list my-selection-set))
+
+; ; ผลลัพธ์คือ my-list ที่มีรายการของ ename ของเส้นทั้งหมดในรายการ
+(defun c:REE3_RENUMBER_DRAWING ()
+  (defun LM:vl-setattributevalue ( blk tag val )
+      (setq tag (strcase tag))
+      (vl-some
+        '(lambda ( att )
+              (if (= tag (strcase (vla-get-tagstring att)))
+                  (progn (vla-put-textstring att val) val)
+              )
+          )
+          (vlax-invoke blk 'getattributes)
+      )
+  )
+
+  (defun get-x-coordinate (entity)
+    (cadr (assoc 10 (entget entity)))
+  )
+
+  (defun sort-entities-by-x (selection-set)
+    (setq entity-list '())
+
+    (setq num-entities (sslength selection-set))
+
+    (setq i 0)
+    (while (< i num-entities)
+      (setq entity (ssname selection-set i))
+      (setq x-coord (get-x-coordinate entity))
+      (setq entity-list (cons (list entity x-coord) entity-list))
+      (setq i (+ i 1))
+    )
+
+    (setq sorted-entity-list (vl-sort entity-list 
+                                    '(lambda (a b) 
+                                      (if (and (cdr a) (cdr b))
+                                        (< (cadr a) (cadr b))
+                                        t) ; เมื่อไม่มีข้อมูล x ให้ถือว่าต่างกัน
+                                    )
+                          )
+    )
+
+    (setq sorted-ename-list '())
+    (foreach entity-entity sorted-entity-list
+      (setq sorted-ename-list (cons (car entity-entity) sorted-ename-list))
+    )
+
+    (reverse sorted-ename-list)
+  )
+  
+  (defun LM:effectivename ( obj )
+    (vlax-get-property obj
+        (if (vlax-property-available-p obj 'effectivename)
+            'effectivename
+            'name
+        )
+    )
+  )
+
+  (setq my-selection-set (ssget  '((0 . "INSERT"))))
+  
+    ; setting mode for choose name efblk
+      (defun get-title-block-string (mode) 
+        (if (= mode 1) 
+          "LNAD - A4 TITLE BLOCK PART REV01"
+          (if (= mode 2) 
+            "GV2"
+            "Unknown Mode"
+          )
+        )
+      )
+      (setq mode-value (cond ( (getint (strcat "\nSpecify object \nmode 1 = Tittle_Block \nmode 2 = GV2_Layout_Border \n<" (rtos (setq mode-value (cond (mode-value) (1.0) ) ) ) "> : \nไม่มี MODE 3 นะคนดีย์" ) ) ) (mode-value) ) )
+      
+      (setq result-mode (get-title-block-string mode-value))
+      (princ (strcat "Result: " result-mode))
+    ; setting mode for choose name efblk
+  
+    ; filtter name blk part
+      (setq ename-list '())
+      ; (setq ef_name "LNAD - A4 TITLE BLOCK PART REV01")
+      (setq ef_name result-mode)
+      ; (setq ef_name (getstring "insert_NAME_BLOCK")) ;::::method 1
+      
+      ; (setq select_name (car (entsel "select_NAME_BLOCK"))) ;::::method 2
+      ; (setq select_name_obj (vlax-ename->vla-object select_name))
+      ; (setq ef_name (LM:effectivename select_name_obj))
+    
+      (setq total_ssget (sslength my-selection-set))
+      (setq ie 0)
+      (setq ename-list '())
+
+      (while 
+        (< ie total_ssget)
+        (setq blk_obj (ssname my-selection-set ie))
+        (setq blk_obj_Set (vlax-ename->vla-object blk_obj))
+        (setq ss (LM:effectivename blk_obj_Set))
+
+          (if (= ef_name ss)
+            (progn
+              (setq ename-list (cons blk_obj ename-list)) 
+            )
+            (princ "\n")
+
+          )
+        (setq ie (+ ie 1))
+      )
+      (princ "\n")
+      (princ (setq total_ename-list (length ename-list)))
+      (setq my-selection-set_SSF (ssadd))
+        (foreach ename ename-list
+          (ssadd ename my-selection-set_SSF)
+        )
+    ; filtter name blk part
+
+  (setq sorted-enames (sort-entities-by-x my-selection-set_SSF))
+  (setq total-entities (length sorted-enames))
+  (setq i 0)
+  (setq ii 101) ; เริ่มต้น ii ที่ 101
+  (setq iii 1) ; เริ่มต้น ii ที่ 101
+  
+  (setq PREFIX_NAME_VIEWPORT (getstring "SPECIFY NAME VIEWPORT")) ; PREFIX สำหรับ DRAWING_NUMBER
+  
+          (setq total-entities (length sorted-enames))
+          (while (< i total-entities)
+              (setq entity (nth i sorted-enames))
+              ; ทำสิ่งที่คุณต้องการกับ ename ที่ปรากฏในตำแหน่งที่ i ใน sorted-enames
+
+              (setq o (vlax-ename->vla-object entity))
+              
+              
+              (setq NAME_VIEWPORT_NEW (strcat PREFIX_NAME_VIEWPORT (if (< ii 10) "0" "") (itoa ii))) ; สร้างชื่อใหม่โดยใช้ ii และแปลงเป็นสตริง
+              (setq SHEET_NO_NEW (strcat (itoa iii) " of " (itoa total-entities))) ; สร้างชื่อใหม่โดยใช้ ii และแปลงเป็นสตริง
+              (setq TOTAL_SHEET_NO_NEW (strcat (itoa total-entities) " PAGE")) ; สร้างชื่อใหม่โดยใช้ ii และแปลงเป็นสตริง
+            
+              (LM:vl-setattributevalue o "DRAWING_NO2" NAME_VIEWPORT_NEW)
+              (LM:vl-setattributevalue o "SHEET_NO." SHEET_NO_NEW)
+              (LM:vl-setattributevalue o "TOTAL_SHEET_NO." TOTAL_SHEET_NO_NEW)
+            
+              (LM:vl-setattributevalue o "NAME_VIEWPORT" NAME_VIEWPORT_NEW)
+              
+
+
+              (setq i (+ i 1))
+              (setq ii (+ ii 1)) ; เพิ่ม ii ทีละ 1   
+              (setq iii (+ iii 1)) ; เพิ่ม iii ทีละ 1   
+            
+          )
+    
+ผลลัพธ์คือ sorted-enames ที่เป็นรายการของ ename ที่ถูกจัดเรียงตามแกน x จากน้อยไปมาก
+;โค้ดนี้ถูกส่งไป MODEL_TO_LAYOUT_AUTO_VIEWPORT_REV04
+
+
+)
