@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image to Punch</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="dark-mode">
+    <header class="topbar">
+      <div><p class="eyebrow">PUNCH PATTERN TOOL</p><h1>Image to Punch</h1></div>
+      <div class="topbar-actions"><p class="topbar-note">Grid first · Image controls diameter</p><button id="theme-toggle" class="theme-toggle" type="button">Light mode</button></div>
+    </header>
+    <main class="app-layout">
+      <aside class="controls" aria-label="Punch settings">
+        <form id="settings-form">
+          <section class="control-section">
+            <h2>Image</h2>
+            <label class="upload-control" for="image-upload"><span>Upload JPEG or PNG</span><input id="image-upload" type="file" accept="image/jpeg,image/png" /></label>
+            <p id="image-name" class="hint">No image selected — artwork maps across the full stock sheet</p>
+            <label>Artwork zoom<input id="image-scale" type="number" min="10" max="400" step="1" value="100" /></label>
+            <label>Artwork fit<select id="image-fit"><option value="contain">Fit inside stock sheet</option><option value="cover">Fill stock sheet (crop)</option><option value="stretch">Stretch to stock sheet</option></select></label>
+            <div class="field-grid two-columns"><label>Artwork X <span>mm</span><input id="artwork-offset-x" type="number" step="0.1" value="0" /></label><label>Artwork Y <span>mm</span><input id="artwork-offset-y" type="number" step="0.1" value="0" /></label></div>
+            <p class="hint">Positive X moves right; positive Y moves up from the sheet centre.</p>
+            <label class="toggle"><input id="move-artwork" type="checkbox" /><span>Drag artwork in preview</span></label><button id="center-artwork" class="add-punch" type="button">Center artwork</button>
+            <label class="toggle"><input id="show-artwork" type="checkbox" checked /><span>Show artwork in preview</span></label>
+          </section>
+          <section class="control-section">
+            <h2>DXF input</h2>
+            <label class="upload-control" for="dxf-upload"><span>Upload DXF</span><input id="dxf-upload" type="file" accept=".dxf,application/dxf,text/plain" /></label>
+            <p id="dxf-name" class="hint">No DXF selected — use this for panel outlines and cut geometry</p>
+            <p id="dxf-info" class="hint">DXF import will be mapped to the stock-sheet coordinate system.</p>
+            <label class="toggle"><input id="show-dxf" type="checkbox" checked /><span>Show DXF geometry in preview</span></label>
+          </section>
+          <section class="control-section">
+            <h2>Stock sheet <span>mm</span></h2>
+            <div class="field-grid two-columns">
+              <label>Width<input id="sheet-width" type="number" min="1" value="1200" /></label><label>Height<input id="sheet-height" type="number" min="1" value="2400" /></label>
+              <label>Start X<input id="start-x" type="number" min="0" value="25" /></label><label>Start Y<input id="start-y" type="number" min="0" value="25" /></label>
+              <label class="full-width">Safe margin<input id="sheet-margin" type="number" min="0" step="0.1" value="0" /></label>
+            </div><p class="hint">Origin: bottom-left (DXF coordinate system)</p>
+          </section>
+          <section class="control-section">
+            <h2>Panel layout <span>mm</span></h2>
+            <div class="field-grid two-columns">
+              <label>Panel width<input id="panel-width" type="number" min="1" value="600" /></label><label>Panel height<input id="panel-height" type="number" min="1" value="800" /></label>
+              <label>Quantity<input id="panel-quantity" type="number" min="1" step="1" value="6" /></label><label>Gap X<input id="panel-gap-x" type="number" min="0" step="0.1" value="0" /></label>
+              <label class="full-width">Gap Y<input id="panel-gap-y" type="number" min="0" step="0.1" value="0" /></label><label class="full-width">Panel punch margin<input id="panel-punch-margin" type="number" min="0" step="0.1" value="20" /></label>
+            </div><label class="toggle"><input id="allow-panel-rotation" type="checkbox" /><span>Allow 90° panel rotation</span></label>
+          </section>
+          <section class="control-section">
+            <h2>Pattern <span>mm / degrees</span></h2>
+            <div class="field-grid two-columns"><label>Pitch X<input id="pitch-x" type="number" min="0.1" step="0.1" value="20" /></label><label>Pitch Y<input id="pitch-y" type="number" min="0.1" step="0.1" value="20" /></label><label class="full-width">Angle<input id="pattern-angle" type="number" min="0" max="360" step="1" value="0" /></label></div>
+          </section>
+          <section class="control-section">
+            <h2>Holes <span>mm</span></h2>
+            <label>Size mode<select id="hole-mode"><option value="continuous">Continuous range</option><option value="punch-list">Punch tool list</option></select></label>
+            <div id="continuous-size-fields" class="field-grid two-columns mode-content">
+              <label>Min size<input id="min-diameter" type="number" min="0" step="0.1" value="2" /></label><label>Max size<input id="max-diameter" type="number" min="0" step="0.1" value="12" /></label>
+              <label>Hole shape<select id="continuous-shape"><option value="circle">Circle</option><option value="square">Square</option><option value="rectangle">Rectangle</option><option value="slot">Slot</option></select></label><label>Shape ratio<input id="continuous-ratio" type="number" min="1" step="0.1" value="2" /></label>
+            </div><label class="toggle"><input id="invert" type="checkbox" /><span>Invert brightness mapping</span></label>
+            <div id="punch-list" class="punch-list mode-content is-hidden" aria-label="Fixed punch tool list">
+              <div class="punch-list-head"><span>Width / Ø</span><span>Height / length</span><span>Hole shape</span><span></span></div>
+              <div id="punch-list-rows">
+                <div class="punch-row"><input class="punch-size" type="number" min="0.1" step="0.1" value="2" aria-label="Punch width or diameter" /><input class="punch-secondary is-hidden" type="number" min="0.1" step="0.1" value="4" aria-label="Punch height or length" disabled /><select class="punch-shape" aria-label="Punch shape"><option value="circle">Circle</option><option value="square">Square</option><option value="rectangle">Rectangle</option><option value="slot">Slot</option></select><button class="remove-punch" type="button" aria-label="Remove punch">×</button></div>
+                <div class="punch-row"><input class="punch-size" type="number" min="0.1" step="0.1" value="4" aria-label="Punch width or diameter" /><input class="punch-secondary is-hidden" type="number" min="0.1" step="0.1" value="8" aria-label="Punch height or length" disabled /><select class="punch-shape" aria-label="Punch shape"><option value="circle">Circle</option><option value="square">Square</option><option value="rectangle">Rectangle</option><option value="slot">Slot</option></select><button class="remove-punch" type="button" aria-label="Remove punch">×</button></div>
+                <div class="punch-row"><input class="punch-size" type="number" min="0.1" step="0.1" value="6" aria-label="Punch width or diameter" /><input class="punch-secondary is-hidden" type="number" min="0.1" step="0.1" value="12" aria-label="Punch height or length" disabled /><select class="punch-shape" aria-label="Punch shape"><option value="circle">Circle</option><option value="square">Square</option><option value="rectangle">Rectangle</option><option value="slot">Slot</option></select><button class="remove-punch" type="button" aria-label="Remove punch">×</button></div>
+                <div class="punch-row"><input class="punch-size" type="number" min="0.1" step="0.1" value="8" aria-label="Punch width or diameter" /><input class="punch-secondary is-hidden" type="number" min="0.1" step="0.1" value="16" aria-label="Punch height or length" disabled /><select class="punch-shape" aria-label="Punch shape"><option value="circle">Circle</option><option value="square">Square</option><option value="rectangle">Rectangle</option><option value="slot">Slot</option></select><button class="remove-punch" type="button" aria-label="Remove punch">×</button></div>
+              </div><button id="add-punch" class="add-punch" type="button">+ Add punch</button><small>Choose only the sizes and shapes available on the punch machine.</small>
+            </div>
+          </section>
+          <div class="actions"><button type="submit" class="primary">Generate preview</button><button id="export-dxf" type="button" class="secondary">Export DXF</button><div class="project-actions"><button id="save-project" type="button" class="secondary">Save project</button><button id="open-project" type="button" class="secondary">Open project</button><input id="project-file" type="file" accept="application/json,.json" hidden /></div><p id="project-status" class="hint">Auto-save is on — settings will be restored after refresh.</p><p id="action-status" class="action-status" aria-live="polite">Change settings, then generate the preview.</p></div>
+        </form>
+      </aside>
+      <section class="workspace" aria-label="Punch preview"><div class="workspace-header"><div><p class="eyebrow">LIVE PREVIEW</p><h2>Perforated panel</h2></div><div class="preview-tools"><button id="preview-zoom-out" type="button" aria-label="Zoom out">−</button><output id="preview-zoom">100%</output><button id="preview-zoom-in" type="button" aria-label="Zoom in">+</button><button id="preview-zoom-fit" type="button">Fit sheet</button><button id="preview-fill" type="button">Fit width</button><label class="preview-size-label">Responsive <select id="preview-size" aria-label="Responsive preview size"><option value="50" selected>50%</option><option value="60">60%</option><option value="70">70%</option><option value="80">80%</option><option value="100">100%</option></select></label><output id="status">Ready to generate</output></div></div><div class="canvas-wrap"><span class="preview-frame-label">Responsive preview area</span><canvas id="preview-canvas" width="1800" height="1244" aria-label="Punch pattern preview"></canvas></div><p class="workspace-note">Fit width is for detail work; Fit sheet is for checking the complete stock layout.</p></section>
+    </main><script src="app.js"></script>
+  </body>
+</html>
