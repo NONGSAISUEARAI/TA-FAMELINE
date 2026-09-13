@@ -3,17 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Image to Punch โดย น้องใส่เสื้อลาย และ ยอดคะน้า เซียนซักแห้ง</title>
+    <title>Image to Punch</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body class="dark-mode">
     <header class="topbar">
-      <div><p class="eyebrow">PUNCH PATTERN TOOL</p><h1>Image to Punch โดย น้องใส่เสื้อลาย และ ยอดคะน้า เซียนซักแห้ง</h1></div>
+      <div><p class="eyebrow">PUNCH PATTERN TOOL</p><h1>Image to Punch</h1></div>
       <div class="topbar-actions"><p class="topbar-note">Grid first · Image controls diameter</p><button id="theme-toggle" class="theme-toggle" type="button">Light mode</button></div>
     </header>
     <main class="app-layout">
       <aside class="controls" aria-label="Punch settings">
         <form id="settings-form">
+          <div class="control-tabs" role="tablist" aria-label="Settings categories">
+            <button id="image-adjustment-tab" class="control-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="image-adjustment-panel" data-settings-tab="image-adjustment">Image setup</button>
+            <button id="image-color-tab" class="control-tab" type="button" role="tab" aria-selected="false" aria-controls="image-color-panel" data-settings-tab="image-color">Image color</button>
+            <button id="sheet-punch-tab" class="control-tab" type="button" role="tab" aria-selected="false" aria-controls="sheet-punch-panel" data-settings-tab="sheet-punch">Sheet &amp; Punch</button>
+          </div>
+          <div id="image-adjustment-panel" class="settings-tab-panel" role="tabpanel" aria-labelledby="image-adjustment-tab">
           <section class="control-section">
             <h2>Image</h2>
             <label class="upload-control" for="image-upload"><span>Upload JPEG or PNG</span><input id="image-upload" type="file" accept="image/jpeg,image/png" /></label>
@@ -25,6 +31,32 @@
             <label class="toggle"><input id="move-artwork" type="checkbox" /><span>Drag artwork in preview</span></label><button id="center-artwork" class="add-punch" type="button">Center artwork</button>
             <label class="toggle"><input id="show-artwork" type="checkbox" checked /><span>Show artwork in preview</span></label>
           </section>
+          </div>
+          <div id="image-color-panel" class="settings-tab-panel" role="tabpanel" aria-labelledby="image-color-tab" hidden>
+            <section class="control-section">
+              <h2>Image color</h2>
+              <div class="tone-controls">
+                <label class="tone-control"><span>Brightness <output id="image-brightness-value">0%</output></span><input id="image-brightness" type="range" min="-100" max="100" step="1" value="0" /></label>
+                <label class="tone-control"><span>Contrast <output id="image-contrast-value">0%</output></span><input id="image-contrast" type="range" min="-100" max="100" step="1" value="0" /></label>
+                <div class="tone-group">
+                  <h3>Levels</h3>
+                  <label class="tone-control"><span>Black point <output id="level-black-value">0</output></span><input id="level-black" type="range" min="0" max="254" step="1" value="0" /></label>
+                  <label class="tone-control"><span>Midtone <output id="level-gamma-value">1.00</output></span><input id="level-gamma" type="range" min="0.10" max="3" step="0.01" value="1" /></label>
+                  <label class="tone-control"><span>White point <output id="level-white-value">255</output></span><input id="level-white" type="range" min="1" max="255" step="1" value="255" /></label>
+                </div>
+                <div class="tone-group curve-group">
+                  <div class="tone-group-heading"><h3>Curves</h3><button id="reset-curve" class="curve-reset" type="button">Reset curve</button></div>
+                  <canvas id="tone-curve" width="260" height="180" aria-label="Tone curve editor"></canvas>
+                  <input id="image-curve" type="hidden" value="0,0;255,255" />
+                  <p class="curve-help">Click to add a point · drag to adjust · double-click a point to remove</p>
+                </div>
+                <label class="tone-control"><span>Artwork opacity <output id="artwork-opacity-value">22%</output></span><input id="artwork-opacity" type="range" min="0" max="100" step="1" value="22" /></label>
+              </div>
+              <button id="reset-image-color" class="secondary reset-image-color" type="button">Reset image color</button>
+              <p class="hint tone-hint">Brightness, contrast, Levels, and Curves affect both the preview artwork and punch-size calculation. Opacity affects the preview only.</p>
+            </section>
+          </div>
+          <div id="sheet-punch-panel" class="settings-tab-panel" role="tabpanel" aria-labelledby="sheet-punch-tab" hidden>
           <section class="control-section">
             <h2>DXF input</h2>
             <label class="upload-control" for="dxf-upload"><span>Upload DXF</span><input id="dxf-upload" type="file" accept=".dxf,application/dxf,text/plain" /></label>
@@ -39,6 +71,15 @@
               <label>Start X<input id="start-x" type="number" min="0" value="25" /></label><label>Start Y<input id="start-y" type="number" min="0" value="25" /></label>
               <label class="full-width">Safe margin<input id="sheet-margin" type="number" min="0" step="0.1" value="0" /></label>
             </div><p class="hint">Origin: bottom-left (DXF coordinate system)</p>
+          </section>
+          <section class="control-section">
+            <h2>Preview colors</h2>
+            <div class="field-grid two-columns color-fields">
+              <label>Sheet color<input id="sheet-color" type="color" value="#dbe1da" /></label>
+              <label>Background color<input id="background-color" type="color" value="#1b241c" /></label>
+            </div>
+            <label class="toggle"><input id="show-sheet" type="checkbox" checked /><span>Show sheet in preview</span></label>
+            <p class="hint">These colors affect the preview only, not the exported DXF.</p>
           </section>
           <section class="control-section">
             <h2>Panel layout <span>mm</span></h2>
@@ -66,10 +107,11 @@
                 <div class="punch-row"><input class="punch-size" type="number" min="0.1" step="0.1" value="4" aria-label="Punch width or diameter" /><input class="punch-secondary is-hidden" type="number" min="0.1" step="0.1" value="8" aria-label="Punch height or length" disabled /><select class="punch-shape" aria-label="Punch shape"><option value="circle">Circle</option><option value="square">Square</option><option value="rectangle">Rectangle</option><option value="slot">Slot</option></select><button class="remove-punch" type="button" aria-label="Remove punch">×</button></div>
                 <div class="punch-row"><input class="punch-size" type="number" min="0.1" step="0.1" value="6" aria-label="Punch width or diameter" /><input class="punch-secondary is-hidden" type="number" min="0.1" step="0.1" value="12" aria-label="Punch height or length" disabled /><select class="punch-shape" aria-label="Punch shape"><option value="circle">Circle</option><option value="square">Square</option><option value="rectangle">Rectangle</option><option value="slot">Slot</option></select><button class="remove-punch" type="button" aria-label="Remove punch">×</button></div>
                 <div class="punch-row"><input class="punch-size" type="number" min="0.1" step="0.1" value="8" aria-label="Punch width or diameter" /><input class="punch-secondary is-hidden" type="number" min="0.1" step="0.1" value="16" aria-label="Punch height or length" disabled /><select class="punch-shape" aria-label="Punch shape"><option value="circle">Circle</option><option value="square">Square</option><option value="rectangle">Rectangle</option><option value="slot">Slot</option></select><button class="remove-punch" type="button" aria-label="Remove punch">×</button></div>
-              </div><button id="add-punch" class="add-punch" type="button">+ Add punch</button><small>Choose only the sizes and shapes available on the punch machine.</small>
+              </div><button id="add-punch" class="add-punch" type="button">+ Add punch</button><small>Edit each tool independently; preview updates automatically. Circle: diameter. Square: side. Rectangle / Slot: overall width × height in mm (Slot includes rounded ends). Tools are ranked by opening area and assigned equal brightness bands, from small/light to large/dark; Invert reverses this.</small>
             </div>
           </section>
           <div class="actions"><button type="submit" class="primary">Generate preview</button><button id="export-dxf" type="button" class="secondary">Export DXF</button><div class="project-actions"><button id="save-project" type="button" class="secondary">Save project</button><button id="open-project" type="button" class="secondary">Open project</button><input id="project-file" type="file" accept="application/json,.json" hidden /></div><p id="project-status" class="hint">Auto-save is on — settings will be restored after refresh.</p><p id="action-status" class="action-status" aria-live="polite">Change settings, then generate the preview.</p></div>
+          </div>
         </form>
       </aside>
       <section class="workspace" aria-label="Punch preview"><div class="workspace-header"><div><p class="eyebrow">LIVE PREVIEW</p><h2>Perforated panel</h2></div><div class="preview-tools"><button id="preview-zoom-out" type="button" aria-label="Zoom out">−</button><output id="preview-zoom">100%</output><button id="preview-zoom-in" type="button" aria-label="Zoom in">+</button><button id="preview-zoom-fit" type="button">Fit sheet</button><button id="preview-fill" type="button">Fit width</button><label class="preview-size-label">Responsive <select id="preview-size" aria-label="Responsive preview size"><option value="50" selected>50%</option><option value="60">60%</option><option value="70">70%</option><option value="80">80%</option><option value="100">100%</option></select></label><output id="status">Ready to generate</output></div></div><div class="canvas-wrap"><span class="preview-frame-label">Responsive preview area</span><canvas id="preview-canvas" width="1800" height="1244" aria-label="Punch pattern preview"></canvas></div><p class="workspace-note">Fit width is for detail work; Fit sheet is for checking the complete stock layout.</p></section>
